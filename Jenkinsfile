@@ -1,22 +1,6 @@
 
 pipeline {
-
-  agent {
-    // Uses the official image that includes docker-compose CLI
-    docker {
-      image 'docker/compose:latest'
-      // Mount the host Docker socket so compose can control Docker on the host
-      args '-v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:$WORKSPACE -w $WORKSPACE'
-    }
-  }
-
-  options {
-    timestamps()
-    ansiColor('xterm')
-    buildDiscarder(logRotator(numToKeepStr: '20'))
-    timeout(time: 30, unit: 'MINUTES')
-  }
-
+    agent any
 
     environment {
         IMAGE_NAME = "user-k8s"
@@ -34,14 +18,21 @@ pipeline {
             }
         }
 
-        stage('Start Infra Services') {
-            steps {
-                script {
-                    echo "Starting MySQL and Kafka using Docker Compose..."
-                    sh "docker-compose -f ${COMPOSE_FILE} up -d mysql zookeeper kafka"
-                }
-            }
-        }
+
+    stage('Start Infra Services') {
+      steps {
+        sh '''
+          set -eux
+          # Run docker/compose image to execute compose commands, mounting workspace + docker socket
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$PWD":"$PWD" -w "$PWD" \
+            docker/compose:latest \
+            sh -lc "docker compose -f '$COMPOSE_FILE' -p '$COMPOSE_PROJECT_NAME' up -d mysql zookeeper kafka || docker-compose -f '$COMPOSE_FILE' -p '$COMPOSE_PROJECT_NAME' up -d mysql zookeeper kafka"
+        '''
+      }
+    }
+
 
 
         stage('Build JAR') {
