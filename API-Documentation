@@ -1,0 +1,8 @@
+public end points:
+http://localhost:8080/myapp/v1/user/create-user -> user registration
+http://localhost:8080/myapp/v1/auth/authenticate -> requires username and password returns jwt token as response
+
+
+rest of the the end points are private and they require Bearer token to access
+
+For more documentation -> http://localhost:8080/myapp/swagger-ui/index.html#
