@@ -1,6 +1,22 @@
 
 pipeline {
-    agent any
+
+  agent {
+    // Uses the official image that includes docker-compose CLI
+    docker {
+      image 'docker/compose:latest'
+      // Mount the host Docker socket so compose can control Docker on the host
+      args '-v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:$WORKSPACE -w $WORKSPACE'
+    }
+  }
+
+  options {
+    timestamps()
+    ansiColor('xterm')
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 30, unit: 'MINUTES')
+  }
+
 
     environment {
         IMAGE_NAME = "user-k8s"
