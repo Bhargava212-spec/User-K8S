@@ -7,6 +7,7 @@ pipeline {
         IMAGE_TAG = "v1"
         DEPLOYMENT_FILE = "deployment.yaml"
         COMPOSE_FILE = "docker-compose.yml"
+        COMPOSE_PROJECT_NAME = 'user-k8s'
     }
 
     stages {
