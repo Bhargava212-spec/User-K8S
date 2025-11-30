@@ -64,14 +64,14 @@ pipeline {
             }
         }
 
-        stage('Cleanup Infra') {
-            steps {
-                script {
-                    echo "Stopping MySQL and Kafka containers..."
-                    bat "docker-compose -f ${COMPOSE_FILE} down"
-                }
-            }
-        }
+//         stage('Cleanup Infra') {
+//             steps {
+//                 script {
+//                     echo "Stopping MySQL and Kafka containers..."
+//                     bat "docker-compose -f ${COMPOSE_FILE} down"
+//                 }
+//             }
+//         }
     }
 
     post {
