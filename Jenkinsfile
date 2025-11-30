@@ -20,19 +20,20 @@ pipeline {
         }
 
 
-    stage('Start Infra Services') {
-      steps {
-        bat '''
-          set -eux
-          # Run docker/compose image to execute compose commands, mounting workspace + docker socket
-          docker run --rm \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v "$PWD":"$PWD" -w "$PWD" \
-            docker/compose:latest \
-            bat -lc "docker compose -f '$COMPOSE_FILE' -p '$COMPOSE_PROJECT_NAME' up -d mysql zookeeper kafka || docker-compose -f '$COMPOSE_FILE' -p '$COMPOSE_PROJECT_NAME' up -d mysql zookeeper kafka"
-        '''
-      }
-    }
+
+        stage('Start Services via Compose') {
+            steps {
+                script {
+                        // Print which compose file Jenkins sees
+                        bat 'echo Using %COMPOSE_FILE%'
+                        // Compose v2 command
+                        bat 'docker compose -f %COMPOSE_FILE% up -d --remove-orphans'
+                        // Optional: list services
+                        bat 'docker compose -f %COMPOSE_FILE% ps'
+                    }
+            }
+        }
+
 
 
 
@@ -40,7 +41,7 @@ pipeline {
             steps {
                 script {
                     echo "Building Spring Boot JAR..."
-                    sh './mvnw clean package -DskipTests'
+                    bat './mvnw clean package -DskipTests'
                 }
             }
         }
@@ -48,7 +49,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                bat "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
 
