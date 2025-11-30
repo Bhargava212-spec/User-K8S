@@ -22,14 +22,14 @@ pipeline {
 
     stage('Start Infra Services') {
       steps {
-        sh '''
+        bat '''
           set -eux
           # Run docker/compose image to execute compose commands, mounting workspace + docker socket
           docker run --rm \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v "$PWD":"$PWD" -w "$PWD" \
             docker/compose:latest \
-            sh -lc "docker compose -f '$COMPOSE_FILE' -p '$COMPOSE_PROJECT_NAME' up -d mysql zookeeper kafka || docker-compose -f '$COMPOSE_FILE' -p '$COMPOSE_PROJECT_NAME' up -d mysql zookeeper kafka"
+            bat -lc "docker compose -f '$COMPOSE_FILE' -p '$COMPOSE_PROJECT_NAME' up -d mysql zookeeper kafka || docker-compose -f '$COMPOSE_FILE' -p '$COMPOSE_PROJECT_NAME' up -d mysql zookeeper kafka"
         '''
       }
     }
