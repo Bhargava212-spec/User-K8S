@@ -24,11 +24,8 @@ pipeline {
         stage('Start Services via Compose') {
             steps {
                 script {
-                        // Print which compose file Jenkins sees
                         bat 'echo Using %COMPOSE_FILE%'
-                        // Compose v2 command
                         bat 'docker compose -f %COMPOSE_FILE% up -d --remove-orphans'
-                        // Optional: list services
                         bat 'docker compose -f %COMPOSE_FILE% ps'
                     }
             }
@@ -41,7 +38,9 @@ pipeline {
             steps {
                 script {
                     echo "Building Spring Boot JAR..."
-                    bat './mvnw clean package -DskipTests'
+                bat 'mvn -version'
+                bat 'mvn -Dmaven.test.failure.ignore=false clean package'
+
                 }
             }
         }
