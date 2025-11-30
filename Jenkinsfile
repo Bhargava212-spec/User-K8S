@@ -60,7 +60,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh "kubectl apply -f ${DEPLOYMENT_FILE}"
+                bat "kubectl apply -f ${DEPLOYMENT_FILE}"
             }
         }
 
@@ -68,7 +68,7 @@ pipeline {
             steps {
                 script {
                     echo "Stopping MySQL and Kafka containers..."
-                    sh "docker-compose -f ${COMPOSE_FILE} down"
+                    bat "docker-compose -f ${COMPOSE_FILE} down"
                 }
             }
         }
