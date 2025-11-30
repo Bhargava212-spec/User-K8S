@@ -10,6 +10,12 @@ pipeline {
         COMPOSE_PROJECT_NAME = 'user-k8s'
     }
 
+   tools {
+    maven 'Maven-3.9.6'
+    }
+
+
+
     stages {
         stage('Checkout') {
             steps {
