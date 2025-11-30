@@ -123,19 +123,19 @@ services:
         CONFLUENT_METRICS_TOPIC_REPLICATION: 1
         PORT: 9021
 
-  app:
-    build: .
-    container_name: spring-app
-    depends_on:
-      - mysql
-      - broker
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/practice
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-    ports:
-      - "8080:8080"
+#  app:
+#    build: .
+#    container_name: spring-app
+#    depends_on:
+#      - mysql
+#      - broker
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/practice
+#      SPRING_DATASOURCE_USERNAME: user
+#      SPRING_DATASOURCE_PASSWORD: password
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+#    ports:
+#      - "8080:8080"
 
 volumes:
   mysql_data:
