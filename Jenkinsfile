@@ -38,8 +38,8 @@ pipeline {
             steps {
                 script {
                     echo "Building Spring Boot JAR..."
-                bat 'mvn -version'
-                bat 'mvn -Dmaven.test.failure.ignore=false clean package'
+                   bat 'mvn -version'
+                   bat 'mvn -Dmaven.test.failure.ignore=false clean package'
 
                 }
             }
