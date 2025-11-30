@@ -17,7 +17,7 @@ spec:
           image: user-k8s:v1
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - containerPort: 8085
           env:
             - name: SPRING_DATASOURCE_URL
               value: jdbc:mysql://host.docker.internal:3306/practice?useSSL=false&allowPublicKeyRetrieval=true
@@ -39,8 +39,8 @@ spec:
     app: springboot
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: 8181
+      targetPort: 8181
       nodePort: 30010
 ---
 apiVersion: v1
