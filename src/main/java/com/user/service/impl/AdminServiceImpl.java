@@ -3,14 +3,11 @@ package com.user.service.impl;
 import com.user.common.exceptions.IncompleteDataException;
 import com.user.core.User;
 import com.user.core.repository.UserRepository;
-import com.user.dto.UserDto;
 import com.user.service.AdminService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Date;
 import java.util.Objects;
 
 @Service

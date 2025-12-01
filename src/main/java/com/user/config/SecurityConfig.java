@@ -1,71 +1,50 @@
+
 package com.user.config;
 
-import com.user.core.User;
-import com.user.core.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.user.service.impl.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@RequiredArgsConstructor
+public class SecurityConfig {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtFilter jwtFilter;
 
-    @Autowired
-    private JwtFilter filter;
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService()).passwordEncoder(passwordEncoder());
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/v1/user/create-user", "/v1/auth/authenticate", "/docs.html",
-                        "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .antMatchers("/v1/user/get-user-details/**").hasAnyRole("USER", "ADMIN")
-                .antMatchers("/v1/user/update-user/**").hasAnyRole("USER", "ADMIN")
-                .antMatchers("/v1/user/delete-user/**").hasAnyRole("ADMIN")
-                .antMatchers("/v1/admin/disable-user/**").hasAnyRole("ADMIN")
-                .antMatchers("/v1/admin/delete-user/**").hasAnyRole("ADMIN")
-                .anyRequest().authenticated()
-                .and().csrf().disable()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//                .formLogin()
-//                .and()
-//                .httpBasic();
-        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
-    }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        return username -> {
-            User user = userRepository.findByUsername(username);
-            if (user == null) {
-                throw new UsernameNotFoundException("User not found with username: " + username);
-            }
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getUsername())
-                    .password(user.getPassword())
-                    .roles(user.getRoles())
-                    .build();
-        };
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+      return  http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/v1/user/create-user", "/v1/auth/authenticate", "/docs.html",
+                                "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/v1/user/get-user-details/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/v1/user/update-user/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/v1/user/delete-user/**").hasRole("ADMIN")
+                        .requestMatchers("/v1/admin/disable-user/**").hasRole("ADMIN")
+                        .requestMatchers("/v1/admin/delete-user/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -73,8 +52,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }
